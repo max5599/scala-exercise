@@ -81,22 +81,90 @@ class ListTest extends FlatSpec with Matchers {
   "Exercise 3.15" should "implements flatten" in {
     flatten(List(List(1, 2), List(3))) shouldBe List(1, 2, 3)
   }
+
+  "Exercise 3.16" should "add 1 to each elements" in {
+    increment(List(1, 2)) shouldBe List(2, 3)
+  }
+
+  "Exercise 3.17" should "convert double to string" in {
+    double2String(List(1.0, 2.0)) shouldBe List("1.0", "2.0")
+  }
+
+  "Exercise 3.18" should "implement map" in {
+    map(List(1.0, 2.0))(_.toString) shouldBe List("1.0", "2.0")
+  }
+
+  "Exercise 3.19" should "implement filter" in {
+    filter(List(1, 2, 3))(_ > 1) shouldBe List(2, 3)
+  }
+
+  "Exercise 3.20" should "implement flatmap" in {
+    flatMap(List(1, 2, 3))(i => List(i, i)) shouldBe List(1, 1, 2, 2, 3, 3)
+  }
+
+  "Exercise 3.21" should "implement filterWithFlatMap" in {
+    filter(List(1, 2, 3))(_ > 1) shouldBe List(2, 3)
+  }
+
+  "Exercise 3.22" should "implement addPairwise" in {
+    addPairwise(List(1, 2, 3), List(4, 5, 6)) shouldBe List(5, 7, 9)
+  }
+
+  "Exercise 3.23" should "implement zipWith" in {
+    zipWith(List("1", "2", "3"), List("4", "5", "6"))((a, b) => s"$a$b") shouldBe List("14", "25", "36")
+  }
+
+  "Exercise 3.24" should "implement hasSubsequence" in {
+    hasSubsequence(List(1,2,3), List(2,3)) shouldBe true
+    hasSubsequence(List(1,2,3), List(2,3,4)) shouldBe false
+  }
 }
 
-sealed trait List[+A]
-
-case object Nil extends List[Nothing]
-
-case class Cons[+A](head: A, tail: List[A]) extends List[A]
-
 object List {
+
+  @tailrec
+  def startsWith[A](l: List[A], prefix: List[A]): Boolean = (l,prefix) match {
+    case (_,Nil) => true
+    case (Cons(h,t),Cons(h2,t2)) if h == h2 => startsWith(t, t2)
+    case _ => false
+  }
+  @tailrec
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = sup match {
+    case Nil => sub == Nil
+    case _ if startsWith(sup, sub) => true
+    case Cons(h,t) => hasSubsequence(t, sub)
+  }
+
+  def zipWith[A, B, C](a: List[A], b: List[B])(f: (A, B) => C): List[C] = (a, b) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+  }
+
+  def addPairwise(a: List[Int], b: List[Int]): List[Int] = (a, b) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, addPairwise(t1, t2))
+  }
+
+  def filterWithFlatMap[A](as: List[A])(f: A => Boolean): List[A] = flatMap(as)(e => if (f(e)) List(e) else Nil)
+
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = concat(map(as)(f))
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] = foldRight(as, Nil: List[A])((h, t) => if (f(h)) Cons(h, t) else t)
+
+  def map[A, B](as: List[A])(f: A => B): List[B] = foldRight(as, Nil: List[B])((h, t) => Cons(f(h), t))
+
+  def double2String(l: List[Double]): List[String] = foldRight(l, Nil: List[String])((h, t) => Cons(h.toString, t))
+
+  def increment(l: List[Int]): List[Int] = foldRight(l, Nil: List[Int])((a, acc) => Cons(a + 1, acc))
 
   def flatten[A](l: List[List[A]]): List[A] = foldRight(l, Nil: List[A])(append)
 
   def append[A](a1: List[A], a2: List[A]): List[A] =
     a1 match {
       case Nil => a2
-      case Cons(h,t) => Cons(h, append(t, a2))
+      case Cons(h, t) => Cons(h, append(t, a2))
     }
 
   def reverse[A](as: List[A]): List[A] = foldLeft(as, Nil: List[A])((acc, x) => Cons(x, acc))
@@ -170,4 +238,13 @@ object List {
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
+
+  def concat[A](l: List[List[A]]): List[A] =
+    foldRight(l, Nil: List[A])(append)
 }
+
+sealed trait List[+A]
+
+case object Nil extends List[Nothing]
+
+case class Cons[+A](head: A, tail: List[A]) extends List[A]
