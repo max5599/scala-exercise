@@ -31,4 +31,25 @@ class OptionTest extends FlatSpec with Matchers {
     None.filter(_ => true) shouldBe None
   }
 
+  "Exercise 4.2" should "implement variance" in {
+    Option.variance(Seq(2.0)) shouldBe Some(0.0)
+    Option.variance(Seq(1.0, 2.0)) shouldBe Some(0.25)
+  }
+
+  "Exercise 4.3" should "implement map2" in {
+    Option.map2(Some(1), Some("a"))((a, b) => s"$a + $b") shouldBe Some("1 + a")
+    Option.map2(None, Some("a"))((a, b) => s"$a + $b") shouldBe None
+    Option.map2(Some(1), None)((a, b) => s"$a + $b") shouldBe None
+  }
+
+  "Exercise 4.4" should "implement sequence" in {
+    Option.sequence(List(Some(1), Some(2))) shouldBe Some(List(1, 2))
+    Option.sequence(List(Some(1), None)) shouldBe None
+  }
+
+  "Exercise 4.5" should "implement traverse" in {
+    Option.traverse(List(1, 2))(a => Some(a + 1)) shouldBe Some(List(2, 3))
+    Option.traverse(List(1, 2))(a => if (a == 1) Some(a) else None) shouldBe None
+  }
+
 }
