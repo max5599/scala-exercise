@@ -56,9 +56,13 @@ trait Stream[+A] {
 
   def headOption: Option[A] = foldRight(None: Option[A])((a, _) => Some(a))
 
-  def map[B](f: A => B) : Stream[B] = foldRight(empty[B])((a,b) => cons(f(a), b))
+  def map[B](f: A => B): Stream[B] = foldRight(empty[B])((a, b) => cons(f(a), b))
 
-  def filter(p: A => Boolean) : Stream[A] = foldRight(empty[A])((a,b) => if(p(a)) cons(a, b) else b)
+  def filter(p: A => Boolean): Stream[A] = foldRight(empty[A])((a, b) => if (p(a)) cons(a, b) else b)
+
+  def append[B >: A](s: => Stream[B]): Stream[B] = foldRight(s)((a, b) => cons(a, b))
+
+  def flatMap[B](f: A => Stream[B]): Stream[B] = foldRight(empty[B])((a, b) => f(a).append(b))
 
   def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
 }
@@ -82,7 +86,18 @@ object Stream {
 
   val ones: Stream[Int] = Stream.cons(1, ones)
 
-  def from(n: Int): Stream[Int] = sys.error("todo")
+  def constant[A](a: A): Stream[A] = {
+    lazy val tail: Stream[A] = Cons(() => a, () => tail)
+    tail
+  }
+
+  def from(n: Int): Stream[Int] = cons[Int](n, from(n+1))
+
+  val fibs = {
+    def go(f0: Int, f1: Int): Stream[Int] =
+      cons(f0, go(f1, f0+f1))
+    go(0, 1)
+  }
 
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = sys.error("todo")
 }

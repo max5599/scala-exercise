@@ -42,4 +42,24 @@ class StreamTest extends FlatSpec with Matchers {
     Stream(1, 2, 3).filter(_ > 1).toList shouldBe Stream(2, 3).toList
   }
 
+  it should "implement append" in {
+    Stream(1, 2, 3).append(Stream(4, 5)).toList shouldBe Stream(1, 2, 3, 4, 5).toList
+  }
+
+  it should "implement flatMap" in {
+    Stream(1, 2, 3).flatMap(Stream(_)).toList shouldBe Stream(1, 2, 3).toList
+  }
+
+  "Exercise 5.8" should "implement constant" in {
+    Stream.constant(1).take(3).toList shouldBe List(1, 1, 1)
+  }
+
+  "Exercise 5.9" should "implement from" in {
+    Stream.from(1).take(3).toList shouldBe List(1, 2, 3)
+  }
+
+  "Exercise 5.10" should "implement fibs" in {
+    Stream.fibs.take(5).toList shouldBe List(0, 1, 1, 2, 3)
+  }
+
 }
