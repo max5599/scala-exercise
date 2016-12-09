@@ -35,6 +35,12 @@ trait Stream[+A] {
     case _ => empty
   }
 
+  def takeViaUnfold(n: Int): Stream[A] = unfold((this, n)) {
+    case (Cons(h, t), 1) => Some((h(), (empty, 0)))
+    case (Cons(h, t), c) if c > 1 => Some(h(), (t(), c - 1))
+    case _ => None
+  }
+
   @annotation.tailrec
   final def drop(n: Int): Stream[A] = this match {
     case Cons(_, t) if n > 0 => t().drop(n - 1)
@@ -57,6 +63,12 @@ trait Stream[+A] {
   def headOption: Option[A] = foldRight(None: Option[A])((a, _) => Some(a))
 
   def map[B](f: A => B): Stream[B] = foldRight(empty[B])((a, b) => cons(f(a), b))
+
+  def mapViaUnfold[B](f: A => B): Stream[B] =
+    unfold(this) {
+      case Cons(h, t) => Some((f(h()), t()))
+      case _ => None
+    }
 
   def filter(p: A => Boolean): Stream[A] = foldRight(empty[A])((a, b) => if (p(a)) cons(a, b) else b)
 
@@ -91,13 +103,24 @@ object Stream {
     tail
   }
 
-  def from(n: Int): Stream[Int] = cons[Int](n, from(n+1))
+  def constantViaUnfold[A](a: A): Stream[A] = unfold(a)(s => Some(s, s))
 
-  val fibs = {
+  def from(n: Int): Stream[Int] = cons[Int](n, from(n + 1))
+
+  def fromViaUnfold(n: Int): Stream[Int] = unfold(n)(s => Some(s, s + 1))
+
+  val fibs: Stream[Int] = {
     def go(f0: Int, f1: Int): Stream[Int] =
-      cons(f0, go(f1, f0+f1))
+      cons(f0, go(f1, f0 + f1))
+
     go(0, 1)
   }
 
-  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = sys.error("todo")
+  val fibsViaUnfold: Stream[Int] = unfold((0, 1)) { case (f0, f1) => Some((f0, (f1, f0 + f1))) }
+
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
+    f(z) match {
+      case Some((h, s)) => cons(h, unfold(s)(f))
+      case None => empty
+    }
 }

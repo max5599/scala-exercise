@@ -62,4 +62,28 @@ class StreamTest extends FlatSpec with Matchers {
     Stream.fibs.take(5).toList shouldBe List(0, 1, 1, 2, 3)
   }
 
+  "Exercise 5.11" should "implement unfold" in {
+    Stream.unfold(1)(s => Some(s, 2)).take(3).toList shouldBe List(1, 2, 2)
+  }
+
+  "Exercise 5.12" should "implement fibs via unfold" in {
+    Stream.fibsViaUnfold.take(5).toList shouldBe List(0, 1, 1, 2, 3)
+  }
+
+  it should "implement from via unfold" in {
+    Stream.fromViaUnfold(1).take(3).toList shouldBe List(1, 2, 3)
+  }
+
+ it should "implement constant via unfold" in {
+    Stream.constantViaUnfold(1).take(3).toList shouldBe List(1, 1, 1)
+  }
+
+  "Exercise 5.13" should "implement map via unfold" in {
+    Stream(1, 2, 3).mapViaUnfold(_ + 1).toList shouldBe Stream(2, 3, 4).toList
+  }
+
+  it should "implement take via unfold" in {
+    Stream(1, 2, 3).takeViaUnfold(2).toList shouldBe List(1, 2)
+  }
+
 }
