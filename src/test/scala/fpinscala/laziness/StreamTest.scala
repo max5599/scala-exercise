@@ -74,16 +74,40 @@ class StreamTest extends FlatSpec with Matchers {
     Stream.fromViaUnfold(1).take(3).toList shouldBe List(1, 2, 3)
   }
 
- it should "implement constant via unfold" in {
+  it should "implement constant via unfold" in {
     Stream.constantViaUnfold(1).take(3).toList shouldBe List(1, 1, 1)
   }
 
   "Exercise 5.13" should "implement map via unfold" in {
-    Stream(1, 2, 3).mapViaUnfold(_ + 1).toList shouldBe Stream(2, 3, 4).toList
+    Stream(1, 2, 3).mapViaUnfold(_ + 1).toList shouldBe List(2, 3, 4)
   }
 
   it should "implement take via unfold" in {
     Stream(1, 2, 3).takeViaUnfold(2).toList shouldBe List(1, 2)
+  }
+
+  it should "implement takeWhile via unfold" in {
+    Stream(1, 2, 3).takeWhileViaUnfold(_ < 3).toList shouldBe List(1, 2)
+  }
+
+  it should "implement zipWith" in {
+    Stream(1, 2, 3).zipWith(Stream(1, 2, 3))((a, b) => a + b).toList shouldBe List(2, 4, 6)
+  }
+
+  it should "implement zipAll" in {
+    Stream(1, 2).zipAll(Stream(1)).toList shouldBe List((Some(1), Some(1)), (Some(2), None))
+  }
+
+  "Exercise 5.14" should "implement startsWith" in {
+    Stream(1,2,3) startsWith Stream(1,2) shouldBe true
+  }
+
+  "Exercise 5.15" should "implement tails" in {
+    Stream(1,2).tails.toList.map(_.toList) shouldBe List(List(1,2), List(2), List())
+  }
+
+  "Exercise 5.16" should "implement scanRight" in {
+    Stream(1,2,3).scanRight(0)(_ + _).toList shouldBe List(6,5,3,0)
   }
 
 }
