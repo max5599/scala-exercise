@@ -27,4 +27,19 @@ class StateTest extends FlatSpec with Matchers {
     println(RNG.ints2(5)(Simple(65)))
   }
 
+  "Exercise 6.5" should "implement double via map" in {
+    println("Exercise 6.5")
+    println(RNG.doubleViaMap(Simple(65)))
+  }
+
+  "Exercise 6.6" should "implement map2" in {
+    println("Exercise 6.6")
+    println(RNG.map2(RNG.nonNegativeInt, RNG.nonNegativeInt)(_ + _)(Simple(65)))
+  }
+
+  "Exercise 6.7" should "implement sequence" in {
+    println("Exercise 6.7")
+    println(RNG.sequence(List(RNG.nonNegativeInt(_), RNG.nonNegativeInt(_)))(Simple(65)))
+  }
+
 }
